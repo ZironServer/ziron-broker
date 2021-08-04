@@ -38,11 +38,12 @@ export class BrokerServer {
     const joinToken = this._options.join || "";
     const joinTokenIndexOfAt = joinToken.indexOf("@");
     if (joinTokenIndexOfAt === -1) {
-      this._logger.logError("Invalid or no join token provided");
-      process.exit(1);
+      this._joinSecret = "";
+      this._joinUri = joinToken;
+    } else {
+      this._joinSecret = joinToken.substring(0, joinTokenIndexOfAt);
+      this._joinUri = joinToken.substring(joinTokenIndexOfAt + 1);
     }
-    this._joinSecret = joinToken.substring(0, joinTokenIndexOfAt);
-    this._joinUri = joinToken.substring(joinTokenIndexOfAt + 1);
 
     this._httpServer = Http.createServer();
     this._server = new Server({
