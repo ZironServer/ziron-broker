@@ -56,7 +56,7 @@ export class BrokerServer {
       await this._server.listen(this._options.port);
       await this.joinCluster();
       this._logger.logActive(
-        `The Broker server launched successfully on the port: ${options.port} and joined the cluster.`
+        `The Broker server launched successfully on the port: ${this._options.port} and joined the cluster.`
       );
     })().catch((err) => {
       this._logger.logError("The broker could not launch: " + err.message);
