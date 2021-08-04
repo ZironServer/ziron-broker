@@ -10,6 +10,7 @@ import * as Http from "http";
 import { Block, Server } from "ziron-server";
 import { Socket } from "ziron-client";
 import { address } from "ip";
+import { buildOptions } from "./Object";
 
 const CLUSTER_VERSION = 1;
 
@@ -31,7 +32,7 @@ export class BrokerServer {
     this._logger = new Logger(this._options.logLevel);
     this._logger.logBusy("Launching broker server...");
 
-    Object.assign(this._options, options);
+    this._options = buildOptions(this._options, options);
 
     const joinToken = this._options.join || "";
     const joinTokenIndexOfAt = joinToken.indexOf("@");
