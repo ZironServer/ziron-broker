@@ -19,6 +19,7 @@ export class BrokerServer {
     join: null,
     logLevel: LogLevel.Everything,
     port: 8888,
+    path: "/",
   };
 
   private readonly _logger: Logger;
@@ -96,6 +97,7 @@ export class BrokerServer {
           type: 1,
           ip: address(),
           port: this._options.port,
+          path: this._options.path,
         },
       },
     });
