@@ -4,10 +4,16 @@ GitHub: LucaCode
 Copyright(c) Luca Scaringella
  */
 
-import {BrokerServer} from "./lib/BrokerServer";
+import { BrokerServer } from "./lib/BrokerServer";
 import { secrets } from "docker-secret";
 
+const variables = Object.assign({}, process.env, secrets);
+
 process.title = `Ziron Broker`;
+
 new BrokerServer({
-    join: secrets.JOIN || process.env.JOIN
+  join:
+    variables.JOIN != null
+      ? variables.JOIN
+      : `${variables.SECRET || ""}@${variables.STATE || ""}`,
 });
