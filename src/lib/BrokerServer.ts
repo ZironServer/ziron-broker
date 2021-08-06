@@ -45,6 +45,13 @@ export class BrokerServer {
       this._joinUri = joinToken.substring(joinTokenIndexOfAt + 1);
     }
 
+    this._options.path =
+      this._options.path === "" || this._options.path === "/"
+        ? ""
+        : !this._options.path.startsWith("/")
+        ? "/" + this._options.path
+        : this._options.path;
+
     this._httpServer = Http.createServer();
     this._server = new Server({
       pingInterval: 4000,
