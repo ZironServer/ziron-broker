@@ -58,6 +58,7 @@ export class BrokerServer {
       pingInterval: 4000,
       allowClientPublish: true,
       socketChannelLimit: null,
+      publishToPublisher: false,
     });
 
     (async () => {
