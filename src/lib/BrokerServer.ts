@@ -54,6 +54,7 @@ export class BrokerServer {
 
     this._httpServer = Http.createServer();
     this._server = new Server({
+      port: this._options.port,
       pingInterval: 4000,
       allowClientPublish: true,
       socketChannelLimit: null,
@@ -61,7 +62,7 @@ export class BrokerServer {
 
     (async () => {
       this._initServer();
-      await this._server.listen(this._options.port);
+      await this._server.listen();
       await this.joinCluster();
       this._logger.logActive(
         `The Broker server launched successfully on the port: ${this._options.port} and joined the cluster.`
