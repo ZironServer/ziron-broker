@@ -121,6 +121,7 @@ export class BrokerServer {
       try {
         await stateSocket.invoke("join");
       } catch (e) {
+        if (!stateSocket.isConnected()) return;
         invokeJoinRetryTicker = setTimeout(invokeJoin, 2000);
       }
     };
