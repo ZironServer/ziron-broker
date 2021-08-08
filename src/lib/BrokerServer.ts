@@ -79,13 +79,13 @@ export class BrokerServer {
       const attachment = req.attachment;
 
       if (typeof attachment !== "object")
-        throw new Block(4005, "Invalid attachment structure");
+        throw new Block(400, "Invalid attachment structure");
 
       if (attachment.secret !== this._joinSecret)
-        throw new Block(4011, "Permission denied");
+        throw new Block(403, "Permission denied");
 
       if (attachment.clusterVersion !== CLUSTER_VERSION)
-        throw new Block(4010, "Incompatible cluster versions");
+        throw new Block(412, "Incompatible cluster versions");
     };
   }
 
