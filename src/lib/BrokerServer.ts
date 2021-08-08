@@ -31,10 +31,10 @@ export class BrokerServer {
   private _stateSocket: Socket;
 
   constructor(options: BrokerServerOptions = {}) {
+    this._options = buildOptions(this._options, options);
+
     this._logger = new Logger(this._options.logLevel);
     this._logger.logBusy("Launching broker server...");
-
-    this._options = buildOptions(this._options, options);
 
     const joinToken = this._options.join || "";
     const joinTokenIndexOfAt = joinToken.indexOf("@");
