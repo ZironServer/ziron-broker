@@ -22,8 +22,6 @@ export class BrokerServer {
     path: "/",
   };
 
-  public readonly launched: Promise<void>;
-
   private readonly _logger: Logger;
   private readonly _joinSecret: string;
   private readonly _joinUri: string;
@@ -63,19 +61,20 @@ export class BrokerServer {
       socketChannelLimit: null,
       publishToPublisher: false,
     });
+    this._initServer();
+  }
 
-    this.launched = (async () => {
-      this._initServer();
+  public async joinAndListen() {
+    try {
       await this._server.listen();
       await this.joinCluster();
       this._logger.logActive(
         `The Broker server launched successfully on the port: ${this._options.port} and joined the cluster.`
       );
-    })();
-    this.launched.catch((err) => {
+    } catch (err) {
       this._logger.logError("The broker could not launch: " + err.message);
       process.exit(1);
-    });
+    }
   }
 
   private _initServer() {

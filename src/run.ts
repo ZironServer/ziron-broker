@@ -16,4 +16,4 @@ new BrokerServer({
     variables.JOIN != null
       ? variables.JOIN
       : `${variables.SECRET || ""}@${variables.STATE || ""}`,
-});
+}).joinAndListen();
