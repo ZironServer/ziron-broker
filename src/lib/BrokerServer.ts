@@ -28,6 +28,7 @@ export class BrokerServer {
 
   private readonly _httpServer: Http.Server;
   private readonly _server: Server;
+  private _stateSocket: Socket;
 
   constructor(options: BrokerServerOptions = {}) {
     this._logger = new Logger(this._options.logLevel);
@@ -90,7 +91,7 @@ export class BrokerServer {
   }
 
   private async joinCluster() {
-    const stateSocket = new Socket(this._joinUri, {
+    this._stateSocket = new Socket(this._joinUri, {
       ackTimeout: 3000,
       connectTimeout: 3000,
       autoReconnect: {
@@ -112,23 +113,34 @@ export class BrokerServer {
         },
       },
     });
-    stateSocket.on("error", (err) => {
+    this._stateSocket.on("error", (err) => {
       this._logger.logError("Error in state socket: " + err.stack);
     });
 
     let invokeJoinRetryTicker;
     const invokeJoin = async () => {
       try {
-        await stateSocket.invoke("join");
+        await this._stateSocket.invoke("join");
       } catch (e) {
-        if (!stateSocket.isConnected()) return;
+        if (!this._stateSocket.isConnected()) return;
         invokeJoinRetryTicker = setTimeout(invokeJoin, 2000);
       }
     };
-    stateSocket.on("connect", () => {
+    this._stateSocket.on("connect", () => {
       clearTimeout(invokeJoinRetryTicker);
       invokeJoin();
     });
-    await stateSocket.connect();
+    await this._stateSocket.connect();
+  }
+
+  /**
+   * Terminates the broker.
+   * After termination, you should not use this instance anymore
+   * or anything else from the broker.
+   * [Use this method only when you know what you do.]
+   */
+  terminate() {
+    this._server.terminate();
+    this._stateSocket?.disconnect();
   }
 }
