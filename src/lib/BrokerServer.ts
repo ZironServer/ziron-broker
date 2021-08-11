@@ -73,7 +73,7 @@ export class BrokerServer {
       );
     } catch (err) {
       this._logger.logError("The broker could not launch: " + err.message);
-      process.exit(1);
+      throw err;
     }
   }
 
