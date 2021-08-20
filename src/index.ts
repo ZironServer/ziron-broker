@@ -4,8 +4,7 @@ GitHub: LucaCode
 Copyright(c) Luca Scaringella
  */
 
-import {BrokerServer} from "./lib/BrokerServer";
+import { BrokerServer } from "./lib/BrokerServer";
+import { LogLevel } from "./lib/Logger";
 
-export {
-    BrokerServer
-}
+export { BrokerServer, LogLevel };
