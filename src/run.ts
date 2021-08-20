@@ -18,6 +18,6 @@ new BrokerServer({
       ? variables.JOIN
       : `${variables.SECRET || ""}@${variables.STATE || ""}`,
   port: parseInt(variables.PORT) || 8888,
-  path: variables.PATH || "/",
+  path: variables.SERVER_PATH || "/",
   logLevel: parseInt(variables.LOG_LEVEL) || LogLevel.Everything,
 }).joinAndListen();
