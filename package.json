@@ -1,6 +1,6 @@
 {
   "name": "ziron-broker",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "description": "Ziron broker",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
