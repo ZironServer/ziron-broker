@@ -19,7 +19,9 @@ new BrokerServer({
       : `${variables.SECRET || ""}@${variables.STATE || ""}`,
   port: parseInt(variables.PORT) || 8888,
   path: variables.SERVER_PATH || "/",
-  logLevel: parseInt(variables.LOG_LEVEL) || LogLevel.Everything,
+  logLevel: isNaN(parseInt(variables.LOG_LEVEL))
+    ? LogLevel.Everything
+    : parseInt(variables.LOG_LEVEL),
 })
   .joinAndListen()
   .catch(() => process.exit(1));
