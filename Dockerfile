@@ -6,6 +6,9 @@ RUN npm run build
 
 
 FROM node:14.18.1-slim
+
+LABEL description="Ziron broker"
+
 WORKDIR /usr/app
 
 COPY package*.json ./
