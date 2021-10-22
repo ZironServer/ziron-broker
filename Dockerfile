@@ -18,4 +18,4 @@ HEALTHCHECK --interval=15s --timeout=15s --start-period=10s \
 
 EXPOSE 8888
 
-CMD npm run start
+CMD npm run docker:start
