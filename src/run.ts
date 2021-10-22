@@ -20,4 +20,6 @@ new BrokerServer({
   port: parseInt(variables.PORT) || 8888,
   path: variables.SERVER_PATH || "/",
   logLevel: parseInt(variables.LOG_LEVEL) || LogLevel.Everything,
-}).joinAndListen();
+})
+  .joinAndListen()
+  .catch(() => process.exit(1));
