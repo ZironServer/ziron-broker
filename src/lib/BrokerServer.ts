@@ -78,7 +78,7 @@ export class BrokerServer {
   }
 
   private _initServer() {
-    this._server.handshakeMiddleware = (req) => {
+    this._server.upgradeMiddleware = (req) => {
       const attachment = req.attachment;
 
       if (typeof attachment !== "object")
