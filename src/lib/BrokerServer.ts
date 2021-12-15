@@ -94,7 +94,7 @@ export class BrokerServer {
 
   private async joinCluster() {
     this._stateSocket = new Socket(this._joinUri, {
-      ackTimeout: 3000,
+      responseTimeout: 3000,
       connectTimeout: 3000,
       autoReconnect: {
         active: true,
