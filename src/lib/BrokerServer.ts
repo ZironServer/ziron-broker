@@ -122,7 +122,7 @@ export class BrokerServer {
     let invokeJoinRetryTicker;
     const invokeJoin = async () => {
       try {
-        await this._stateSocket.invoke("join");
+        await this._stateSocket.invoke("#join");
       } catch (e) {
         if (!this._stateSocket.isConnected()) return;
         invokeJoinRetryTicker = setTimeout(invokeJoin, 2000);
