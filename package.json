@@ -20,7 +20,7 @@
   "dependencies": {
     "ziron-server": "4.3.0",
     "ziron-client": "4.3.0",
-    "docker-secret": "^1.2.3",
+    "docker-secret": "^1.2.4",
     "ip": "^1.1.5"
   },
   "devDependencies": {
