@@ -26,7 +26,6 @@ export class BrokerServer {
   private readonly _joinSecret: string;
   private readonly _joinUri: string;
 
-  private readonly _httpServer: Http.Server;
   private readonly _server: Server;
   private _stateSocket: Socket;
 
@@ -53,7 +52,6 @@ export class BrokerServer {
         ? "/" + this._options.path
         : this._options.path;
 
-    this._httpServer = Http.createServer();
     this._server = new Server({
       port: this._options.port,
       pingInterval: 4000,
