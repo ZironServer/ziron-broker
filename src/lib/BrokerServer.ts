@@ -6,11 +6,16 @@ Copyright(c) Ing. Luca Gian Scaringella
 
 import BrokerServerOptions from "./BrokerServerOptions";
 import Logger, { LogLevel } from "./Logger";
-import * as Http from "http";
-import { Block, Server } from "ziron-server";
-import { Socket } from "ziron-client";
+import {
+  applyStandaloneProcedures, applyStandaloneReceivers,
+  Block,
+  Server,
+} from "ziron-server";
+import { Socket as ClientSocket } from "ziron-client";
 import { address } from "ip";
 import { buildOptions } from "./Object";
+import {StandaloneProcedures} from "ziron-server/dist/lib/Procedure";
+import {StandaloneReceivers} from "ziron-server/dist/lib/Receiver";
 
 const CLUSTER_VERSION = 1;
 
@@ -27,7 +32,10 @@ export class BrokerServer {
   private readonly _joinUri: string;
 
   private readonly _server: Server;
-  private _stateSocket: Socket;
+  private _stateSocket: ClientSocket;
+  
+  public readonly procedures: StandaloneProcedures = {};
+  public readonly receivers: StandaloneReceivers = {};
 
   constructor(options: BrokerServerOptions = {}) {
     this._options = buildOptions(this._options, options);
@@ -88,10 +96,14 @@ export class BrokerServer {
       if (attachment.clusterVersion !== CLUSTER_VERSION)
         throw new Block(412, "Incompatible cluster versions");
     };
+    this._server.connectionHandler = socket => {
+      applyStandaloneProcedures(socket,this.procedures);
+      applyStandaloneReceivers(socket,this.receivers);
+    };
   }
 
   private async joinCluster() {
-    this._stateSocket = new Socket(this._joinUri, {
+    this._stateSocket = new ClientSocket(this._joinUri, {
       responseTimeout: 3000,
       connectTimeout: 3000,
       autoReconnect: {
