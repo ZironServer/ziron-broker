@@ -134,6 +134,13 @@ export class BrokerServer {
       try {
         await this._stateSocket.invoke("#join");
       } catch (e) {
+        if(e) {
+          if(e.name === "IdAlreadyUsedInClusterError")
+            this._logger.logWarning(`Can not join the cluster, the server-id: "${this._server.id}" already exists in the cluster.` +
+                `The broker will retry joining...`);
+          else if(e.stack) this._logger.logError(`Error while trying to join the cluster: ${e.stack}.` +
+              `The broker will retry joining...`);
+        }
         if (!this._stateSocket.isConnected()) return;
         invokeJoinRetryTicker = setTimeout(invokeJoin, 2000);
       }
