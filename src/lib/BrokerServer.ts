@@ -20,6 +20,9 @@ import {StandaloneReceivers} from "ziron-server/dist/lib/Receiver";
 const CLUSTER_VERSION = 1;
 
 export class BrokerServer {
+
+  get id() {return this.server.id;}
+
   private readonly _options: Required<BrokerServerOptions> = {
     join: null,
     logLevel: LogLevel.Everything,
