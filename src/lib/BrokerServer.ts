@@ -31,7 +31,13 @@ export class BrokerServer {
   private readonly _joinSecret: string;
   private readonly _joinUri: string;
 
-  private readonly _server: Server;
+  /**
+   * @description
+   * Use the server object carefully.
+   * Never change properties on the server; use it only to access state information.
+   * @protected
+   */
+  protected readonly server: Server;
   private _stateSocket: ClientSocket;
   
   public readonly procedures: StandaloneProcedures = {};
@@ -60,7 +66,7 @@ export class BrokerServer {
         ? "/" + this._options.path
         : this._options.path;
 
-    this._server = new Server({
+    this.server = new Server({
       port: this._options.port,
       pingInterval: 4000,
       allowClientPublish: true,
@@ -72,7 +78,7 @@ export class BrokerServer {
 
   public async joinAndListen() {
     try {
-      await this._server.listen();
+      await this.server.listen();
       await this.joinCluster();
       this._logger.logActive(
         `The Broker server launched successfully on the port: ${this._options.port} and joined the cluster.`
@@ -84,7 +90,7 @@ export class BrokerServer {
   }
 
   private _initServer() {
-    this._server.upgradeMiddleware = (req) => {
+    this.server.upgradeMiddleware = (req) => {
       const attachment = req.attachment;
 
       if (typeof attachment !== "object")
@@ -96,7 +102,7 @@ export class BrokerServer {
       if (attachment.clusterVersion !== CLUSTER_VERSION)
         throw new Block(412, "Incompatible cluster versions");
     };
-    this._server.connectionHandler = socket => {
+    this.server.connectionHandler = socket => {
       applyStandaloneProcedures(socket,this.procedures);
       applyStandaloneReceivers(socket,this.receivers);
     };
@@ -117,7 +123,7 @@ export class BrokerServer {
         secret: this._joinSecret,
         clusterVersion: CLUSTER_VERSION,
         node: {
-          id: this._server.id,
+          id: this.server.id,
           type: 1,
           ip: address(),
           port: this._options.port,
@@ -136,7 +142,7 @@ export class BrokerServer {
       } catch (e) {
         if(e) {
           if(e.name === "IdAlreadyUsedInClusterError")
-            this._logger.logWarning(`Can not join the cluster, the server-id: "${this._server.id}" already exists in the cluster.` +
+            this._logger.logWarning(`Can not join the cluster, the server-id: "${this.server.id}" already exists in the cluster.` +
                 `The broker will retry joining...`);
           else if(e.stack) this._logger.logError(`Error while trying to join the cluster: ${e.stack}.` +
               `The broker will retry joining...`);
@@ -159,7 +165,7 @@ export class BrokerServer {
    * [Use this method only when you know what you do.]
    */
   terminate() {
-    this._server.terminate();
+    this.server.terminate();
     this._stateSocket?.disconnect();
   }
 }
