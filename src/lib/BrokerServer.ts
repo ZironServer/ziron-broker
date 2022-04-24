@@ -79,6 +79,10 @@ export class BrokerServer {
     this._initServer();
   }
 
+  isConnectedToState(): boolean {
+    return this._stateSocket.isConnected();
+  }
+
   public async joinAndListen() {
     try {
       await this.server.listen();
