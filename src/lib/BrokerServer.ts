@@ -80,20 +80,18 @@ export class BrokerServer {
   }
 
   isConnectedToState(): boolean {
-    return this._stateSocket.isConnected();
+    return this._stateSocket?.isConnected();
   }
 
-  public async joinAndListen() {
-    try {
-      await this.server.listen();
-      await this.joinCluster();
-      this._logger.logActive(
-        `The Broker server launched successfully on the port: ${this._options.port} and joined the cluster.`
-      );
-    } catch (err) {
-      this._logger.logError("The broker could not launch: " + err.message);
-      throw err;
-    }
+  protected async listen() {
+    if(this.server.isListening()) return;
+    await this.server.listen();
+    this._logger.logActive(`Broker server launched successfully on port: ${this._options.port}.`);
+  }
+
+  public async listenAndJoin() {
+    await this.listen();
+    await this.join();
   }
 
   private _initServer() {
@@ -115,7 +113,18 @@ export class BrokerServer {
     };
   }
 
-  private async joinCluster() {
+  protected async join() {
+    if(!this.server.isListening()) throw new Error("The broker needs to listen before joining a cluster.");
+    if(this._stateSocket) throw new Error("Join should only be invoked once. " +
+        "The server will automatically retry to rejoin the cluster in case of disconnection.");
+
+    let initJoinResolve: () => void;
+    let initJoinReject: (err: Error) => void;
+    const initJoin: Promise<void> = new Promise((res, rej) => {
+      initJoinResolve = res;
+      initJoinReject = rej;
+    });
+
     this._stateSocket = new ClientSocket(this._joinUri, {
       responseTimeout: 3000,
       connectTimeout: 3000,
@@ -146,8 +155,10 @@ export class BrokerServer {
     const invokeJoin = async () => {
       try {
         await this._stateSocket.invoke("#join");
+        initJoinResolve();
       } catch (e) {
         if(e) {
+          initJoinReject!(e);
           if(e.name === "IdAlreadyUsedInClusterError")
             this._logger.logWarning(`Can not join the cluster, the server-id: "${this.server.id}" already exists in the cluster.` +
                 `The broker will retry joining...`);
@@ -162,7 +173,13 @@ export class BrokerServer {
       clearTimeout(invokeJoinRetryTicker);
       invokeJoin();
     });
-    await this._stateSocket.connect();
+    try {await this._stateSocket.connect();}
+    catch (e) {
+      this._logger.logError(`Error while trying to connect to the state server for the first time: ${e.stack}.` +
+          `The broker will retry connecting...`);
+      initJoinReject!(e);
+    }
+    return initJoin;
   }
 
   /**

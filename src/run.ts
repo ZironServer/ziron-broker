@@ -23,5 +23,5 @@ new BrokerServer({
     ? LogLevel.Everything
     : parseInt(variables.LOG_LEVEL),
 })
-  .joinAndListen()
+  .listenAndJoin()
   .catch(() => process.exit(1));
