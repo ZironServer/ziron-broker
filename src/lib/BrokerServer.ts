@@ -110,6 +110,7 @@ export class BrokerServer {
     this.server.connectionHandler = socket => {
       applyStandaloneProcedures(socket,this.procedures);
       applyStandaloneReceivers(socket,this.receivers);
+      return this.id;
     };
   }
 
