@@ -114,10 +114,18 @@ export class BrokerServer {
     };
   }
 
+  /**
+   * Starts joining the cluster.
+   * Returns a promise that will be fulfilled when the broker has joined for the first time.
+   * Notice that the broker will automatically retry rejoining in case of disconnections.
+   * @protected
+   */
   protected async join() {
     if(!this.server.isListening()) throw new Error("The broker needs to listen before joining a cluster.");
     if(this._stateSocket) throw new Error("Join should only be invoked once. " +
         "The server will automatically retry to rejoin the cluster in case of disconnection.");
+
+    let initJoined = false;
 
     let initJoinResolve: () => void;
     let initJoinReject: (err: Error) => void;
@@ -156,15 +164,15 @@ export class BrokerServer {
     const invokeJoin = async () => {
       try {
         await this._stateSocket.invoke("#join");
+        this._logger.logInfo(`Broker has ${initJoined? "re" : ""}joined the cluster.`);
+        initJoined = true;
         initJoinResolve();
       } catch (e) {
         if(e) {
           initJoinReject!(e);
           if(e.name === "IdAlreadyUsedInClusterError")
-            this._logger.logWarning(`Can not join the cluster, the server-id: "${this.server.id}" already exists in the cluster.` +
-                `The broker will retry joining...`);
-          else if(e.stack) this._logger.logError(`Error while trying to join the cluster: ${e.stack}.` +
-              `The broker will retry joining...`);
+            this._logger.logWarning(`Attempt to join the cluster failed, the server-id: "${this.server.id}" already exists in the cluster.`);
+          else if(e.stack) this._logger.logError(`Attempt to join the cluster failed: ${e.stack}.`);
         }
         if (!this._stateSocket.isConnected()) return;
         invokeJoinRetryTicker = setTimeout(invokeJoin, 2000);
@@ -174,12 +182,10 @@ export class BrokerServer {
       clearTimeout(invokeJoinRetryTicker);
       invokeJoin();
     });
-    try {await this._stateSocket.connect();}
-    catch (e) {
-      this._logger.logError(`Error while trying to connect to the state server for the first time: ${e.stack}.` +
-          `The broker will retry connecting...`);
-      initJoinReject!(e);
-    }
+    this._stateSocket.connect().catch((err) => {
+      initJoinReject!(err);
+      this._logger.logError(`Attempt to join the cluster failed: ${err.stack}.`);
+    })
     return initJoin;
   }
 
