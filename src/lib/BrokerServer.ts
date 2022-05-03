@@ -16,12 +16,15 @@ import { address } from "ip";
 import { buildOptions } from "./Object";
 import {StandaloneProcedures} from "ziron-server/dist/lib/Procedure";
 import {StandaloneReceivers} from "ziron-server/dist/lib/Receiver";
+import {Writable} from "./Utils";
 
 const CLUSTER_VERSION = 1;
 
 export class BrokerServer {
 
   get id() {return this.server.id;}
+
+  readonly stateId?: string;
 
   private readonly _options: Required<BrokerServerOptions> = {
     join: null,
@@ -178,7 +181,11 @@ export class BrokerServer {
         invokeJoinRetryTicker = setTimeout(invokeJoin, 2000);
       }
     };
-    this._stateSocket.on("connect", () => {
+    this._stateSocket.on("disconnect", () => {
+      (this as Writable<BrokerServer>).stateId = undefined;
+    });
+    this._stateSocket.on("connect", (stateId: string) => {
+      if(stateId) (this as Writable<BrokerServer>).stateId = stateId;
       clearTimeout(invokeJoinRetryTicker);
       invokeJoin();
     });
