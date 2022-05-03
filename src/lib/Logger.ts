@@ -24,6 +24,11 @@ export default class Logger {
       console.log("\x1b[32m%s\x1b[0m", "   [ACTIVE]", msg.join("\n"));
   }
 
+  public logInfo(...msg: string[]) {
+    if (this.level >= LogLevel.Everything)
+      console.log("\x1b[36m%s\x1b[0m", "   [INFO]", msg.join("\n"));
+  }
+
   public logError(...msg: string[]) {
     if (this.level >= LogLevel.Errors)
       console.error("\x1b[31m%s\x1b[0m", "   [Error]", msg.join("\n"));
