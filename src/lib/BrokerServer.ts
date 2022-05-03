@@ -50,7 +50,6 @@ export class BrokerServer {
     this._options = buildOptions(this._options, options);
 
     this._logger = new Logger(this._options.logLevel);
-    this._logger.logBusy("Launching broker server...");
 
     const joinToken = this._options.join || "";
     const joinTokenIndexOfAt = joinToken.indexOf("@");
@@ -85,6 +84,7 @@ export class BrokerServer {
 
   protected async listen() {
     if(this.server.isListening()) return;
+    this._logger.logBusy("Launching broker server...");
     await this.server.listen();
     this._logger.logActive(`Broker server launched successfully on port: ${this._options.port}.`);
   }
