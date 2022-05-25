@@ -8,7 +8,7 @@ import BrokerServerOptions from "./BrokerServerOptions";
 import Logger, { LogLevel } from "./Logger";
 import {
   applyStandaloneProcedures, applyStandaloneReceivers,
-  Block,
+  Block, FailedToListenError,
   Server,
 } from "ziron-server";
 import { Socket as ClientSocket } from "ziron-client";
@@ -87,9 +87,16 @@ export class BrokerServer {
 
   protected async listen() {
     if(this.server.isListening()) return;
-    this._logger.logBusy("Launching broker server...");
-    await this.server.listen();
-    this._logger.logActive(`Broker server launched successfully on port: ${this._options.port}.`);
+    try {
+      this._logger.logBusy("Launching broker server...");
+      await this.server.listen();
+      this._logger.logActive(`Broker server launched successfully on port: ${this._options.port}.`);
+    }
+    catch (err) {
+      if(err instanceof FailedToListenError)
+        this._logger.logFailed(`Failed to listen on port: ${this._options.port}. Maybe the port is already in use.`);
+      throw err;
+    }
   }
 
   public async listenAndJoin() {
