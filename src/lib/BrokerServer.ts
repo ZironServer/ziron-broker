@@ -43,11 +43,11 @@ export class BrokerServer {
    * Never change properties on the server; use it only to access state information.
    * @protected
    */
-  readonly server: Server;
+  protected readonly server: Server;
   private _stateSocket: ClientSocket;
-  
-  public readonly procedures: StandaloneProcedures = {};
-  public readonly receivers: StandaloneReceivers = {};
+
+  protected readonly procedures: StandaloneProcedures = {};
+  protected readonly receivers: StandaloneReceivers = {};
 
   constructor(options: BrokerServerOptions = {}) {
     this._options = buildOptions(this._options, options);
