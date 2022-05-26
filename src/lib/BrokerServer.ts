@@ -43,7 +43,7 @@ export class BrokerServer {
    * Never change properties on the server; use it only to access state information.
    * @protected
    */
-  protected readonly server: Server;
+  readonly server: Server;
   private _stateSocket: ClientSocket;
   
   public readonly procedures: StandaloneProcedures = {};
