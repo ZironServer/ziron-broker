@@ -16,7 +16,7 @@ import { address } from "ip";
 import { buildOptions } from "./Object";
 import {StandaloneProcedures} from "ziron-server/dist/lib/Procedure";
 import {StandaloneReceivers} from "ziron-server/dist/lib/Receiver";
-import {Writable} from "./Utils";
+import {ensureError, Writable} from "./Utils";
 
 const CLUSTER_VERSION = 1;
 
@@ -177,13 +177,12 @@ export class BrokerServer {
         this._logger.logInfo(`Broker has ${initJoined? "re" : ""}joined the cluster.`);
         initJoined = true;
         initJoinResolve();
-      } catch (e) {
-        if(e) {
-          initJoinReject!(e);
-          if(e.name === "IdAlreadyUsedInClusterError")
-            this._logger.logWarning(`Attempt to join the cluster failed, the server-id: "${this.server.id}" already exists in the cluster.`);
-          else if(e.stack) this._logger.logError(`Attempt to join the cluster failed: ${e.stack}.`);
-        }
+      } catch (rawErr) {
+        const err = ensureError(rawErr);
+        initJoinReject!(err);
+        if(err.name === "IdAlreadyUsedInClusterError")
+          this._logger.logWarning(`Attempt to join the cluster failed, the server-id: "${this.server.id}" already exists in the cluster.`);
+        else if(err.stack) this._logger.logError(`Attempt to join the cluster failed: ${err.stack}.`);
         if (!this._stateSocket.isConnected()) return;
         invokeJoinRetryTicker = setTimeout(invokeJoin, 2000);
       }
