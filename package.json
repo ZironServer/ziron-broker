@@ -18,8 +18,8 @@
     "email": "lucacode1@gmail.com"
   },
   "dependencies": {
-    "ziron-server": "9.9.3",
-    "ziron-client": "9.9.3",
+    "ziron-server": "9.9.4",
+    "ziron-client": "9.9.4",
     "docker-secret": "^1.2.4",
     "ip": "^1.1.8"
   },
