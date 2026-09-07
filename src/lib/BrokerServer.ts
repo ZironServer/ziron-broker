@@ -5,6 +5,7 @@ Copyright(c) Ing. Luca Gian Scaringella
  */
 
 import BrokerServerOptions from "./BrokerServerOptions";
+import { timingSafeEqual } from "crypto";
 import Logger, { LogLevel } from "./Logger";
 import {
   applyStandaloneProcedures, applyStandaloneReceivers,
@@ -19,6 +20,15 @@ import {StandaloneReceivers} from "ziron-server/dist/lib/Receiver";
 import {ensureError, Writable} from "./Utils";
 
 const CLUSTER_VERSION = 1;
+
+/**
+ * Compares the join secret in constant time.
+ */
+function secretEquals(value: unknown, secret: string): boolean {
+  if (typeof value !== "string") return false;
+  const a = Buffer.from(value), b = Buffer.from(secret);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
 export class BrokerServer {
 
@@ -44,6 +54,7 @@ export class BrokerServer {
    * @protected
    */
   protected readonly server: Server;
+  private _invokeJoinRetryTicker: NodeJS.Timeout | undefined;
   private _stateSocket: ClientSocket;
 
   protected readonly procedures: StandaloneProcedures = {};
@@ -108,10 +119,10 @@ export class BrokerServer {
     this.server.upgradeMiddleware = (req) => {
       const attachment = req.attachment;
 
-      if (typeof attachment !== "object")
+      if (attachment == null || typeof attachment !== "object")
         throw new Block(400, "Invalid attachment structure");
 
-      if (attachment.secret !== this._joinSecret)
+      if (!secretEquals(attachment.secret, this._joinSecret))
         throw new Block(403, "Permission denied");
 
       if (attachment.clusterVersion !== CLUSTER_VERSION)
@@ -170,7 +181,7 @@ export class BrokerServer {
       this._logger.logError("Error in state socket: " + err.stack);
     });
 
-    let invokeJoinRetryTicker;
+    let invokeJoinRetryTicker: NodeJS.Timeout | undefined;
     const invokeJoin = async () => {
       try {
         await this._stateSocket.invoke("#join");
@@ -185,9 +196,11 @@ export class BrokerServer {
         else if(err.stack) this._logger.logError(`Attempt to join the cluster failed: ${err.stack}.`);
         if (!this._stateSocket.isConnected()) return;
         invokeJoinRetryTicker = setTimeout(invokeJoin, 2000);
+        this._invokeJoinRetryTicker = invokeJoinRetryTicker;
       }
     };
     this._stateSocket.on("disconnect", () => {
+      clearTimeout(invokeJoinRetryTicker);
       (this as Writable<BrokerServer>).stateId = undefined;
     });
     this._stateSocket.on("connect", (stateId: string) => {
@@ -209,6 +222,7 @@ export class BrokerServer {
    * [Use this method only when you know what you do.]
    */
   terminate() {
+    clearTimeout(this._invokeJoinRetryTicker);
     this.server.terminate();
     this._stateSocket?.disconnect();
   }
