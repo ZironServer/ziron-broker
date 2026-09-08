@@ -13,7 +13,7 @@ import {
   Server,
 } from "ziron-server";
 import { Socket as ClientSocket } from "ziron-client";
-import { address } from "ip";
+import { localIpAddress } from "./Utils";
 import { buildOptions } from "./Object";
 import {StandaloneProcedures} from "ziron-server/dist/lib/Procedure";
 import {StandaloneReceivers} from "ziron-server/dist/lib/Receiver";
@@ -171,7 +171,7 @@ export class BrokerServer {
         node: {
           id: this.server.id,
           type: 1,
-          ip: address(),
+          ip: localIpAddress(),
           port: this._options.port,
           path: this._options.path,
         },
