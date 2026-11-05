@@ -19,8 +19,8 @@
   },
   "dependencies": {
     "docker-secret": "^1.2.4",
-    "ziron-client": "9.10.0",
-    "ziron-server": "9.10.0"
+    "ziron-client": "9.11.0",
+    "ziron-server": "9.11.0"
   },
   "devDependencies": {
     "del": "^5.1.0",
