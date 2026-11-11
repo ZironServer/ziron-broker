@@ -1,6 +1,6 @@
 {
   "name": "ziron-broker",
-  "version": "9.13.0",
+  "version": "9.14.0",
   "description": "Ziron broker",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,8 +19,8 @@
   },
   "dependencies": {
     "docker-secret": "^1.2.4",
-    "ziron-client": "9.13.0",
-    "ziron-server": "9.13.0"
+    "ziron-client": "9.14.0",
+    "ziron-server": "9.14.0"
   },
   "devDependencies": {
     "del": "^5.1.0",
